@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 
 import authRouter from "./routes/authRouter.js";
-// import waterRouter from "./routes/waterRouter.js";
+import waterRouter from "./routes/waterRouter.js";
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/api/users", authRouter);
-// app.use("/api/water", waterRouter);
+app.use("/api/water", waterRouter);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
@@ -24,10 +24,7 @@ app.use((_, res) => {
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
@@ -42,9 +39,7 @@ mongoose
   .connect(DB_HOST)
   .then(() => {
     app.listen(PORT, () => {
-      console.log(
-        `Database connection successful. Use our API on port: ${PORT}`
-      );
+      console.log(`Database connection successful. Use our API on port: ${PORT}`);
     });
   })
   .catch((err) => {

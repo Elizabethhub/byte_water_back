@@ -25,27 +25,18 @@ const signup = async (req, res) => {
   if (user) {
     throw HttpError(409, "email already used");
   }
-  const verificationCode = nanoid();
+  // const verificationCode = nanoid();
   const avatarURL = gravatar.url(email);
-  const newUser = await authServices.signup({ ...req.body, avatarURL, verificationCode });
-
-  //*** to allow verification required to add env variables: */
-  // .env file
-  //UKR_NET_PASSWORD=
-  //UKR_NET_EMAIL=
-  //***_____________________________________ */
-  // const verifyEmail = {
-  //   to: email,
-  //   subject: "Verify email",
-  //   html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationCode}">Click to verify email</a>`,
-  // };
-
-  // await sendEmail(verifyEmail);
+  // const newUser = await authServices.signup({ ...req.body, avatarURL, verificationCode });
+  const newUser = await authServices.signup({
+    ...req.body,
+    avatarURL,
+    username: `User${Date.now()}`,
+  });
 
   res.status(201).json({
     username: newUser.username,
     email: newUser.email,
-    subscription: newUser.subscription,
     avatarURL: avatarURL,
   });
 };
@@ -56,7 +47,10 @@ const verify = async (req, res) => {
   if (!user) {
     throw HttpError(404, "User not found");
   }
-  await userServices.updateUser({ _id: user.id }, { verify: true, verificationCode: "" });
+  await userServices.updateUser(
+    { _id: user.id },
+    { verify: true, verificationCode: "" }
+  );
   res.json({
     message: "Verification successful",
   });
@@ -90,9 +84,6 @@ const signin = async (req, res) => {
   if (!user) {
     throw HttpError(401, "Email or password invalid"); //"Email invalid"
   }
-  if (!user.verify) {
-    throw HttpError(401, "Email not verified");
-  }
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
     throw HttpError(401, "Email or password invalid"); //"Password invalid")
@@ -100,10 +91,10 @@ const signin = async (req, res) => {
   const payload = { id: user._id };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
   await authServices.setToken(user._id, token);
-
+  const { username, avatarURL } = user;
   res.json({
     token,
-    user: { email, subscription: user.subscription },
+    user: { email, username, avatarURL },
   });
 };
 
@@ -117,11 +108,12 @@ const signout = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email, username, subscription } = req.user;
+  const { email, avatarURL, username } = req.user;
+  console.log(req.user);
   res.json({
     email,
+    avatarURL,
     username,
-    subscription,
   });
 };
 
@@ -139,7 +131,9 @@ const updateAvatar = async (req, res) => {
     const updatedFile = await Jimp.read(oldPath);
     updatedFile.resize(250, 250).write(oldPath);
     const [avatarExtension] = filename.split(".").reverse();
-    const newFileName = path.join(`user_avatar-image_${_id}.${avatarExtension}`);
+    const newFileName = path.join(
+      `user_avatar-image_${_id}.${avatarExtension}`
+    );
     const newPath = path.join(contactsDir, newFileName);
     await fs.rename(oldPath, newPath);
     const avatarURL = path.join("avatars", newFileName);

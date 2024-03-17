@@ -8,7 +8,6 @@ const userSchema = new Schema(
   {
     username: {
       type: String,
-      required: true,
     },
     email: {
       type: String,
@@ -21,20 +20,20 @@ const userSchema = new Schema(
       required: [true, "Password is required"],
       minlength: 6,
     },
-    verify: {
-      type: Boolean,
-      default: false,
-      required: true,
-    },
-    verificationCode: {
-      type: String,
-      required: [true, "Verify token is required"],
-    },
-    subscription: {
-      type: String,
-      enum: ["starter", "pro", "business"],
-      default: "starter",
-    },
+    // verify: {
+    //   type: Boolean,
+    //   default: false,
+    //   required: true,
+    // },
+    // verificationCode: {
+    //   type: String,
+    //   required: [true, "Verify token is required"],
+    // },
+    // subscription: {
+    //   type: String,
+    //   enum: ["starter", "pro", "business"],
+    //   default: "starter",
+    // },
     avatarURL: { type: String },
     token: {
       type: String,

@@ -15,7 +15,7 @@ import ctrlWrapper from "../decorators/ctrlWrapper.js";
 import HttpError from "../helpers/HttpError.js";
 // import sendEmail from "../helpers/sendEmail.js";
 
-const contactsDir = path.resolve("public", "avatars");
+const avatarsDir = path.resolve("public", "avatars");
 
 const { JWT_SECRET, BASE_URL } = process.env;
 
@@ -124,25 +124,49 @@ const updateSubscription = async (req, res) => {
   res.json(result);
 };
 
+// const updateAvatar = async (req, res) => {
+//   const { path: oldPath, filename } = req.file;
+//   try {
+//     const { _id } = req.user;
+//     const updatedFile = await Jimp.read(oldPath);
+//     updatedFile.resize(250, 250).write(oldPath);
+//     const [avatarExtension] = filename.split(".").reverse();
+//     const newFileName = path.join(
+//       `user_avatar-image_${_id}.${avatarExtension}`
+//     );
+//     const newPath = path.join(contactsDir, newFileName);
+//     await fs.rename(oldPath, newPath);
+//     const avatarURL = path.join("avatars", newFileName);
+//     await authServices.setAvatar(_id, avatarURL);
+//     res.json({ avatarURL });
+//   } catch (error) {
+//     await fs.unlink(tempStorage);
+//     throw error;
+//   }
+// };
+
 const updateAvatar = async (req, res) => {
+  const { email } = req.user;
+
   const { path: oldPath, filename } = req.file;
-  try {
-    const { _id } = req.user;
-    const updatedFile = await Jimp.read(oldPath);
-    updatedFile.resize(250, 250).write(oldPath);
-    const [avatarExtension] = filename.split(".").reverse();
-    const newFileName = path.join(
-      `user_avatar-image_${_id}.${avatarExtension}`
-    );
-    const newPath = path.join(contactsDir, newFileName);
-    await fs.rename(oldPath, newPath);
-    const avatarURL = path.join("avatars", newFileName);
-    await authServices.setAvatar(_id, avatarURL);
-    res.json({ avatarURL });
-  } catch (error) {
-    await fs.unlink(tempStorage);
-    throw error;
+  const newPath = path.join(avatarsDir, filename);
+
+  const file = await Jimp.read(oldPath);
+  file.resize(250, 250);
+
+  await fs.rename(oldPath, newPath);
+  const avatarURL = path.join("avatars", filename);
+
+  const result = await userServices.updateUser(
+    { email },
+    { ...req.body, avatarURL }
+  );
+  if (!result) {
+    throw HttpError(401, "Not authorized");
   }
+  res.status(200).json({
+    avatarURL,
+  });
 };
 
 export default {

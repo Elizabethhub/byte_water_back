@@ -34,6 +34,7 @@ const userSchema = new Schema(
     //   enum: ["starter", "pro", "business"],
     //   default: "starter",
     // },
+    dailyNorma: { type: Number, required: [true] },
     avatarURL: { type: String },
     token: {
       type: String,

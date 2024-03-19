@@ -32,12 +32,14 @@ const signup = async (req, res) => {
     ...req.body,
     avatarURL,
     username: `User${Date.now()}`,
+    dailyNorma: 2000,
   });
 
   res.status(201).json({
     username: newUser.username,
     email: newUser.email,
     avatarURL: avatarURL,
+    dailyNorma: newUser.dailyNorma,
   });
 };
 
@@ -91,10 +93,10 @@ const signin = async (req, res) => {
   const payload = { id: user._id };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
   await authServices.setToken(user._id, token);
-  const { username, avatarURL } = user;
+  const { username, avatarURL, dailyNorma } = user;
   res.json({
     token,
-    user: { email, username, avatarURL },
+    user: { email, username, avatarURL, dailyNorma },
   });
 };
 
@@ -108,12 +110,13 @@ const signout = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email, avatarURL, username } = req.user;
-  console.log(req.user);
+  const { email, avatarURL, username, dailyNorma } = req.user;
+
   res.json({
     email,
     avatarURL,
     username,
+    dailyNorma,
   });
 };
 

@@ -29,11 +29,6 @@ const userSchema = new Schema(
     //   type: String,
     //   required: [true, "Verify token is required"],
     // },
-    // subscription: {
-    //   type: String,
-    //   enum: ["starter", "pro", "business"],
-    //   default: "starter",
-    // },
     dailyNorma: { type: Number, required: [true] },
     avatarURL: { type: String },
     token: {

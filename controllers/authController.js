@@ -49,10 +49,7 @@ const verify = async (req, res) => {
   if (!user) {
     throw HttpError(404, "User not found");
   }
-  await userServices.updateUser(
-    { _id: user.id },
-    { verify: true, verificationCode: "" }
-  );
+  await userServices.updateUser({ _id: user.id }, { verify: true, verificationCode: "" });
   res.json({
     message: "Verification successful",
   });
@@ -120,10 +117,10 @@ const getCurrent = async (req, res) => {
   });
 };
 
-const updateSubscription = async (req, res) => {
-  const { subscription } = req.body;
+const updateDailyNorma = async (req, res) => {
+  const { dailyNorma } = req.body;
   const { _id } = req.user;
-  const result = await authServices.setSubscription(_id, subscription);
+  const result = await authServices.setDailyNorma(_id, dailyNorma);
   res.json(result);
 };
 
@@ -160,10 +157,7 @@ const updateAvatar = async (req, res) => {
   await fs.rename(oldPath, newPath);
   const avatarURL = path.join("avatars", filename);
 
-  const result = await userServices.updateUser(
-    { email },
-    { ...req.body, avatarURL }
-  );
+  const result = await userServices.updateUser({ email }, { ...req.body, avatarURL });
   if (!result) {
     throw HttpError(401, "Not authorized");
   }
@@ -179,6 +173,6 @@ export default {
   signin: ctrlWrapper(signin),
   signout: ctrlWrapper(signout),
   getCurrent: ctrlWrapper(getCurrent),
-  updateSubscription: ctrlWrapper(updateSubscription),
+  updateDailyNorma: ctrlWrapper(updateDailyNorma),
   updateAvatar: ctrlWrapper(updateAvatar),
 };

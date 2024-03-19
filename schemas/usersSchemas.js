@@ -11,10 +11,10 @@ export const signinSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-export const updateSubscriptionSchema = Joi.object({
-  subscription: Joi.string().valid("starter", "pro", "business").required(),
-});
-
 export const verifySchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
+});
+
+export const updateDayNorma = Joi.object({
+  dailyNorma: Joi.number().min(1).max(15000).required(),
 });

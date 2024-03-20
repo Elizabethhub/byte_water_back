@@ -7,6 +7,7 @@ import validateBody from '../decorators/validateBody.js';
 import {
   signupSchema,
   signinSchema,
+  updateUserSchema,
   updateDayNorma,
   verifySchema,
   forgotPasswordSchema,
@@ -34,6 +35,13 @@ authRouter.post('/login', validateBody(signinSchema), authController.signin);
 authRouter.post('/logout', authenticate, authController.signout);
 
 authRouter.get('/current', authenticate, authController.getCurrent);
+
+authRouter.patch(
+  '/update-user',
+  authenticate,
+  validateBody(updateUserSchema),
+  authController.updateUserInfo
+);
 
 authRouter.patch(
   '/avatars',

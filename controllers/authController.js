@@ -111,12 +111,31 @@ const signout = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email, avatarURL, username, dailyNorma } = req.user;
+  const { email, avatarURL, username, dailyNorma, gender } = req.user;
   res.json({
     email,
     avatarURL,
     username,
+    gender,
     dailyNorma,
+  });
+};
+
+const updateUserInfo = async (req, res) => {
+  const { email } = req.user;
+  console.log(req.body);
+  const result = await userServices.updateUser({ email }, req.body);
+  const { avatarURL, gender, email: newEmail, username } = result;
+  console.log(result);
+  if (!result) {
+    throw HttpError(404);
+  }
+  res.status(200).json({
+    gender,
+    username,
+    email,
+    newEmail,
+    avatarURL,
   });
 };
 
@@ -129,7 +148,8 @@ const updateDailyNorma = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
-
+  console.log(req.file);
+  console.log(req.user);
   const { path: oldPath, filename } = req.file;
   const newPath = path.join(avatarsDir, filename);
 
@@ -206,6 +226,7 @@ export default {
   signin: ctrlWrapper(signin),
   signout: ctrlWrapper(signout),
   getCurrent: ctrlWrapper(getCurrent),
+  updateUserInfo: ctrlWrapper(updateUserInfo),
   updateDailyNorma: ctrlWrapper(updateDailyNorma),
   updateAvatar: ctrlWrapper(updateAvatar),
   forgotPassword: ctrlWrapper(forgotPassword),

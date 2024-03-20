@@ -11,8 +11,11 @@ export const signinSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-export const updateSubscriptionSchema = Joi.object({
-  subscription: Joi.string().valid("starter", "pro", "business").required(),
+export const updateUserSchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+  name: Joi.string().max(32),
+  gender: Joi.string().valid("woman", "man").required(),
+  password: Joi.string().min(8),
 });
 
 export const verifySchema = Joi.object({

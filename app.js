@@ -24,7 +24,10 @@ app.use((_, res) => {
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
 });
 
@@ -39,7 +42,9 @@ mongoose
   .connect(DB_HOST)
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Database connection successful. Use our API on port: ${PORT}`);
+      console.log(
+        `Database connection successful. Use our API on port: ${PORT}`
+      );
     });
   })
   .catch((err) => {

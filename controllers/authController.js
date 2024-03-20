@@ -108,46 +108,45 @@ const signout = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email, avatarURL, username } = req.user;
+  const { email, avatarURL, username, gender } = req.user;
   console.log(req.user);
   res.json({
     email,
     avatarURL,
     username,
+    gender,
   });
 };
 
-const updateSubscription = async (req, res) => {
-  const { subscription } = req.body;
-  const { _id } = req.user;
-  const result = await authServices.setSubscription(_id, subscription);
-  res.json(result);
-};
-
-// const updateAvatar = async (req, res) => {
-//   const { path: oldPath, filename } = req.file;
-//   try {
-//     const { _id } = req.user;
-//     const updatedFile = await Jimp.read(oldPath);
-//     updatedFile.resize(250, 250).write(oldPath);
-//     const [avatarExtension] = filename.split(".").reverse();
-//     const newFileName = path.join(
-//       `user_avatar-image_${_id}.${avatarExtension}`
-//     );
-//     const newPath = path.join(contactsDir, newFileName);
-//     await fs.rename(oldPath, newPath);
-//     const avatarURL = path.join("avatars", newFileName);
-//     await authServices.setAvatar(_id, avatarURL);
-//     res.json({ avatarURL });
-//   } catch (error) {
-//     await fs.unlink(tempStorage);
-//     throw error;
-//   }
+// const updateSubscription = async (req, res) => {
+//   const { subscription } = req.body;
+//   const { _id } = req.user;
+//   const result = await authServices.setSubscription(_id, subscription);
+//   res.json(result);
 // };
+
+const updateUserInfo = async (req, res) => {
+  const { email } = req.user;
+  console.log(req.body);
+  const result = await userServices.updateUser({ email }, req.body);
+  const { avatarURL, gender, email: newEmail, username } = result;
+  console.log(result);
+  if (!result) {
+    throw HttpError(404);
+  }
+  res.status(200).json({
+    gender,
+    username,
+    email,
+    newEmail,
+    avatarURL,
+  });
+};
 
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
-
+  console.log(req.file);
+  console.log(req.user);
   const { path: oldPath, filename } = req.file;
   const newPath = path.join(avatarsDir, filename);
 
@@ -176,6 +175,6 @@ export default {
   signin: ctrlWrapper(signin),
   signout: ctrlWrapper(signout),
   getCurrent: ctrlWrapper(getCurrent),
-  updateSubscription: ctrlWrapper(updateSubscription),
+  updateUserInfo: ctrlWrapper(updateUserInfo),
   updateAvatar: ctrlWrapper(updateAvatar),
 };

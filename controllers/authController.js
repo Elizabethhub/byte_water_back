@@ -122,7 +122,7 @@ const getCurrent = async (req, res) => {
 const updateDailyNorma = async (req, res) => {
   const { dailyNorma } = req.body;
   const { _id } = req.user;
-  const result = await authServices.setDailyNorma(_id, dailyNorma);
+  await authServices.setDailyNorma(_id, dailyNorma);
   res.json({ message: 'Successfully updated', dailyNorma });
 };
 

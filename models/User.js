@@ -1,8 +1,8 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
-import { handleSaveError, setUpdateSetting } from "./hooks.js";
+import { handleSaveError, setUpdateSetting } from './hooks.js';
 
-import { emailRegexp } from "../constants/regexp.js";
+import { emailRegexp } from '../constants/regexp.js';
 
 const userSchema = new Schema(
   {
@@ -13,11 +13,11 @@ const userSchema = new Schema(
       type: String,
       match: emailRegexp,
       unique: true, // before saving to db - rechecks if email is unique for certain collection
-      required: [true, "Email is required"],
+      required: [true, 'Email is required'],
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: [true, 'Password is required'],
       minlength: 6,
     },
     // verify: {
@@ -34,16 +34,19 @@ const userSchema = new Schema(
     token: {
       type: String,
     },
+    tempCode: {
+      type: String,
+    },
   },
   { versionKey: false, timestamps: true }
 );
 
-userSchema.post("save", handleSaveError);
+userSchema.post('save', handleSaveError);
 
-userSchema.pre("findByIdAndUpdate", setUpdateSetting);
+userSchema.pre('findByIdAndUpdate', setUpdateSetting);
 
-userSchema.post("findByIdAndUpdate", handleSaveError);
+userSchema.post('findByIdAndUpdate', handleSaveError);
 
-const User = model("user", userSchema);
+const User = model('user', userSchema);
 
 export default User;

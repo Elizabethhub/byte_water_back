@@ -9,6 +9,8 @@ import {
   signinSchema,
   updateDayNorma,
   verifySchema,
+  forgotPasswordSchema,
+  updatePasswordSchema,
 } from '../schemas/usersSchemas.js';
 
 import authenticate from '../middlewares/authenticate.js';
@@ -45,6 +47,17 @@ authRouter.patch(
   authenticate,
   validateBody(updateDayNorma),
   authController.updateDailyNorma
+);
+
+authRouter.post(
+  '/forgot-password',
+  validateBody(forgotPasswordSchema),
+  authController.forgotPassword
+);
+authRouter.post(
+  '/update-password/:tempCode',
+  validateBody(updatePasswordSchema),
+  authController.updatePassword
 );
 
 export default authRouter;

@@ -23,6 +23,11 @@ const userSchema = new Schema(
       required: [true, 'Password is required'],
       minlength: 6,
     },
+    // newPassword: {
+    //   type: String,
+    //   // required: [true, 'Password is required'],
+    //   minlength: 6,
+    // },
 
     dailyNorma: { type: Number, required: [true] },
     avatarURL: { type: String },

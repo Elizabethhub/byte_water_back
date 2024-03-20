@@ -13,11 +13,12 @@ import * as userServices from '../services/userServices.js';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
 
 import HttpError from '../helpers/HttpError.js';
-// import sendEmail from "../helpers/sendEmail.js";
+import sendEmail from '../helpers/sendEmail.js';
+import { generateRandomCode } from '../helpers/generateRandomCode.js';
 
 const avatarsDir = path.resolve('public', 'avatars');
 
-const { JWT_SECRET, BASE_URL } = process.env;
+const { JWT_SECRET, BASE_URL, DEPLOY_HOST } = process.env;
 
 const signup = async (req, res) => {
   const { email } = req.body;
@@ -126,27 +127,6 @@ const updateDailyNorma = async (req, res) => {
   res.json({ message: 'Successfully updated', dailyNorma });
 };
 
-// const updateAvatar = async (req, res) => {
-//   const { path: oldPath, filename } = req.file;
-//   try {
-//     const { _id } = req.user;
-//     const updatedFile = await Jimp.read(oldPath);
-//     updatedFile.resize(250, 250).write(oldPath);
-//     const [avatarExtension] = filename.split(".").reverse();
-//     const newFileName = path.join(
-//       `user_avatar-image_${_id}.${avatarExtension}`
-//     );
-//     const newPath = path.join(contactsDir, newFileName);
-//     await fs.rename(oldPath, newPath);
-//     const avatarURL = path.join("avatars", newFileName);
-//     await authServices.setAvatar(_id, avatarURL);
-//     res.json({ avatarURL });
-//   } catch (error) {
-//     await fs.unlink(tempStorage);
-//     throw error;
-//   }
-// };
-
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
 
@@ -171,6 +151,54 @@ const updateAvatar = async (req, res) => {
   });
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await userServices.findUser({ email });
+  if (!user) {
+    throw HttpError(404, 'User not found');
+  }
+
+  const tempCode = generateRandomCode();
+
+  await userServices.updateUser({ email }, { tempCode });
+
+  const userEmail = {
+    to: email,
+    subject: 'Forgot password',
+    html: `<a target="_blank" href="${DEPLOY_HOST}/update-password/${tempCode}">Click to update your password!</a>`,
+  };
+
+  await sendEmail(userEmail);
+
+  res.json({
+    message: 'Forgot password email sent',
+  });
+};
+
+const updatePassword = async (req, res) => {
+  const { tempCode } = req.params;
+  const { newPassword } = req.body;
+
+  const user = await userServices.findUser({ tempCode });
+  if (!user) {
+    throw HttpError(404, 'User not found');
+  }
+  const passwordCompare = await bcrypt.compare(newPassword, user.password);
+  if (passwordCompare) {
+    throw HttpError(401, 'The old password is the same as the new one');
+  }
+
+  await authServices.updatePassword(tempCode, {
+    password: newPassword,
+    tempCode: undefined,
+  });
+
+  res.status(200).json({
+    message: 'Your password updated successful',
+  });
+};
+
 export default {
   signup: ctrlWrapper(signup),
   verify: ctrlWrapper(verify),
@@ -180,4 +208,6 @@ export default {
   getCurrent: ctrlWrapper(getCurrent),
   updateDailyNorma: ctrlWrapper(updateDailyNorma),
   updateAvatar: ctrlWrapper(updateAvatar),
+  forgotPassword: ctrlWrapper(forgotPassword),
+  updatePassword: ctrlWrapper(updatePassword),
 };

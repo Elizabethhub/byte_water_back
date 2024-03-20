@@ -1,5 +1,5 @@
-import Joi from "joi";
-import { emailRegexp } from "../constants/regexp.js";
+import Joi from 'joi';
+import { emailRegexp } from '../constants/regexp.js';
 
 export const signupSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(), // email() will has different validation than indicated in Schema for email, that's why pattern() is better
@@ -17,4 +17,10 @@ export const verifySchema = Joi.object({
 
 export const updateDayNorma = Joi.object({
   dailyNorma: Joi.number().min(1).max(15000).required(),
+});
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().pattern(emailRegexp).required(),
+});
+export const updatePasswordSchema = Joi.object({
+  newPassword: Joi.string().min(6).required(),
 });

@@ -12,6 +12,11 @@ const waterSchema = new Schema(
       type: String,
       required: [true, "Time is required"],
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
   },
   { versionKey: false, timestamps: true }
 );

@@ -227,7 +227,7 @@ const forgotPassword = async (req, res) => {
         If you have not taken this action, ignore this message.
       </p>
       <p style="font-size: 12px; color: #999; text-align: center">
-        Best regards, <span style="color: #407bff">Bite me!</span>
+        Best regards, <span style="color: #407bff">Byte me!</span>
       </p>
     </div>`,
   };

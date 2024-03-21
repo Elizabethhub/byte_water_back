@@ -13,7 +13,7 @@ export const signinSchema = Joi.object({
 
 export const updateUserSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
-  name: Joi.string().max(32),
+  username: Joi.string().max(32),
   gender: Joi.string().valid('woman', 'man').required(),
   newPassword: Joi.string().min(8),
 });

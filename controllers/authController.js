@@ -123,18 +123,17 @@ const getCurrent = async (req, res) => {
 
 const updateUserInfo = async (req, res) => {
   const { email } = req.user;
-  console.log(req.body);
+
   const result = await userServices.updateUser({ email }, req.body);
   const { avatarURL, gender, email: newEmail, username } = result;
-  console.log(result);
+
   if (!result) {
     throw HttpError(404);
   }
   res.status(200).json({
     gender,
     username,
-    email,
-    newEmail,
+    email: newEmail,
     avatarURL,
   });
 };
@@ -148,8 +147,7 @@ const updateDailyNorma = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
-  console.log(req.file);
-  console.log(req.user);
+
   const { path: oldPath, filename } = req.file;
   const newPath = path.join(avatarsDir, filename);
 
@@ -164,7 +162,7 @@ const updateAvatar = async (req, res) => {
     { ...req.body, avatarURL }
   );
   if (!result) {
-    throw HttpError(401, 'Not authorized');
+    throw HttpError(404);
   }
   res.status(200).json({
     avatarURL,

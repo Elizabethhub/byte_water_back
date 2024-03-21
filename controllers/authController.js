@@ -15,6 +15,7 @@ import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helpers/HttpError.js';
 import sendEmail from '../helpers/sendEmail.js';
 import { generateRandomCode } from '../helpers/generateRandomCode.js';
+import { confirmLetterSvg } from '../constants/confirmLetter.js';
 
 const avatarsDir = path.resolve('public', 'avatars');
 
@@ -180,11 +181,53 @@ const forgotPassword = async (req, res) => {
   const tempCode = generateRandomCode();
 
   await userServices.updateUser({ email }, { tempCode });
-
   const userEmail = {
     to: email,
     subject: 'Forgot password',
-    html: `<a target="_blank" href="${DEPLOY_HOST}/update-password/${tempCode}">Click to update your password!</a>`,
+    html: `
+ <div
+      style="
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        width: 500px;
+        margin: 0 auto;
+        border: 5px solid #9ebbff;
+        border-radius: 20px;
+      "
+    >
+      <p style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px">
+        Good day, ${email} .
+      </p>
+      ${confirmLetterSvg}
+
+      <p style="font-size: 14px; color: #666; text-align: center">
+        Thank you for registering on our website. <br />
+        To complete the authorization process, please click on the link below:
+      </p>
+      <div style="text-align: center; margin-bottom: 20px">
+        <a
+          target="_blank"
+          href="${DEPLOY_HOST}/update-password/${tempCode}"
+          style="
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #407bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+          "
+          >Click to update your password!</a
+        >
+      </div>
+      <p style="font-size: 14px; color: #666; text-align: justify">
+        If you have not taken this action, ignore this message.
+      </p>
+      <p style="font-size: 12px; color: #999; text-align: center">
+        Best regards, <span style="color: #407bff">Byte me!</span>
+      </p>
+    </div>`,
   };
 
   await sendEmail(userEmail);

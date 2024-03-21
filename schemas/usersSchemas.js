@@ -15,6 +15,7 @@ export const updateUserSchema = Joi.object({
   email: Joi.string().pattern(emailRegexp).required(),
   username: Joi.string().max(32),
   gender: Joi.string().valid('woman', 'man').required(),
+  oldPassword: Joi.string().min(8),
   newPassword: Joi.string().min(8),
 });
 

@@ -123,13 +123,40 @@ const getCurrent = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res) => {
-  const { email } = req.user;
+  const { email, password } = req.user;
+  const { oldPassword, newPassword } = req.body;
+  console.log(newPassword);
+  console.log(oldPassword);
+
+  const user = await userServices.findUser({ email });
+  console.log(user);
+  if (!user) {
+    throw HttpError(404, 'Such user does not exist'); //"Email invalid"
+  }
+
+  if (oldPassword) {
+    const oldPasswordCompare = await bcrypt.compare(oldPassword, password);
+    console.log(oldPasswordCompare);
+    if (!oldPasswordCompare) {
+      throw HttpError(400, 'The old password is wrong');
+    }
+  }
+  if (newPassword) {
+    const passwordCompare = await bcrypt.compare(newPassword, password);
+    console.log(passwordCompare);
+    if (passwordCompare) {
+      throw HttpError(
+        400,
+        'The new password must be different from the old one'
+      ); //"Password invalid")
+    }
+  }
 
   const result = await userServices.updateUser({ email }, req.body);
   const { avatarURL, gender, email: newEmail, username } = result;
 
   if (!result) {
-    throw HttpError(404);
+    throw HttpError(404, 'Such user does not exist');
   }
   res.status(200).json({
     gender,

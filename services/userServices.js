@@ -19,4 +19,3 @@ export const updateUser = async (filter, data) => {
     return User.findOneAndUpdate(filter, data, { new: true });
   }
 };
-// 2b$10$3T7MVJI2VzCcMFzYZIDp2uhPJYLnfkV5cn9I0OqQNb7uzNFNTH9W.

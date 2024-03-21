@@ -200,7 +200,7 @@ const forgotPassword = async (req, res) => {
       "
     >
       <p style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px">
-        Good day, USER
+        Good day, ${email} .
       </p>
       ${confirmLetterSvg}
 

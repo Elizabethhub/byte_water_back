@@ -1,11 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import fs from 'fs/promises';
-import path from 'path';
-import { nanoid } from 'nanoid';
 
 import gravatar from 'gravatar';
-import Jimp from 'jimp';
 
 import * as authServices from '../services/authServices.js';
 import * as userServices from '../services/userServices.js';
@@ -15,8 +12,8 @@ import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helpers/HttpError.js';
 import sendEmail from '../helpers/sendEmail.js';
 import { generateRandomCode } from '../helpers/generateRandomCode.js';
-
-const avatarsDir = path.resolve('public', 'avatars');
+import cloudinary from '../helpers/cloudinary.js';
+import { confirmLetterSvg } from '../constants/confirmLetter.js';
 
 const { JWT_SECRET, BASE_URL, DEPLOY_HOST } = process.env;
 
@@ -26,9 +23,7 @@ const signup = async (req, res) => {
   if (user) {
     throw HttpError(409, 'email already used');
   }
-  // const verificationCode = nanoid();
   const avatarURL = gravatar.url(email);
-  // const newUser = await authServices.signup({ ...req.body, avatarURL, verificationCode });
   const newUser = await authServices.signup({
     ...req.body,
     avatarURL,
@@ -122,19 +117,45 @@ const getCurrent = async (req, res) => {
 };
 
 const updateUserInfo = async (req, res) => {
-  const { email } = req.user;
-  console.log(req.body);
+  const { email, password } = req.user;
+  const { oldPassword, newPassword } = req.body;
+  console.log(newPassword);
+  console.log(oldPassword);
+
+  const user = await userServices.findUser({ email });
+  console.log(user);
+  if (!user) {
+    throw HttpError(404, 'Such user does not exist');
+  }
+
+  if (oldPassword) {
+    const oldPasswordCompare = await bcrypt.compare(oldPassword, password);
+    console.log(oldPasswordCompare);
+    if (!oldPasswordCompare) {
+      throw HttpError(400, 'The old password is wrong');
+    }
+  }
+  if (newPassword) {
+    const passwordCompare = await bcrypt.compare(newPassword, password);
+    console.log(passwordCompare);
+    if (passwordCompare) {
+      throw HttpError(
+        400,
+        'The new password must be different from the old one'
+      );
+    }
+  }
+
   const result = await userServices.updateUser({ email }, req.body);
   const { avatarURL, gender, email: newEmail, username } = result;
-  console.log(result);
+
   if (!result) {
-    throw HttpError(404);
+    throw HttpError(404, 'Such user does not exist');
   }
   res.status(200).json({
     gender,
     username,
-    email,
-    newEmail,
+    email: newEmail,
     avatarURL,
   });
 };
@@ -148,23 +169,20 @@ const updateDailyNorma = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
-  console.log(req.file);
-  console.log(req.user);
-  const { path: oldPath, filename } = req.file;
-  const newPath = path.join(avatarsDir, filename);
+  const { url: avatarURL } = await cloudinary.uploader.upload(req.file.path, {
+    folder: 'avatars',
+  });
+  console.log(avatarURL);
+  const { path: oldPath } = req.file;
 
-  const file = await Jimp.read(oldPath);
-  file.resize(250, 250);
-
-  await fs.rename(oldPath, newPath);
-  const avatarURL = path.join('avatars', filename);
+  await fs.rm(oldPath);
 
   const result = await userServices.updateUser(
     { email },
     { ...req.body, avatarURL }
   );
   if (!result) {
-    throw HttpError(401, 'Not authorized');
+    throw HttpError(404);
   }
   res.status(200).json({
     avatarURL,
@@ -182,11 +200,53 @@ const forgotPassword = async (req, res) => {
   const tempCode = generateRandomCode();
 
   await userServices.updateUser({ email }, { tempCode });
-
   const userEmail = {
     to: email,
     subject: 'Forgot password',
-    html: `<a target="_blank" href="${DEPLOY_HOST}/update-password/${tempCode}">Click to update your password!</a>`,
+    html: `
+ <div
+      style="
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        width: 500px;
+        margin: 0 auto;
+        border: 5px solid #9ebbff;
+        border-radius: 20px;
+      "
+    >
+      <p style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px">
+        Good day, ${email} .
+      </p>
+      ${confirmLetterSvg}
+
+      <p style="font-size: 14px; color: #666; text-align: center">
+        Thank you for registering on our website. <br />
+        To complete the authorization process, please click on the link below:
+      </p>
+      <div style="text-align: center; margin-bottom: 20px">
+        <a
+          target="_blank"
+          href="${DEPLOY_HOST}/update-password/${tempCode}"
+          style="
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #407bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+          "
+          >Click to update your password!</a
+        >
+      </div>
+      <p style="font-size: 14px; color: #666; text-align: justify">
+        If you have not taken this action, ignore this message.
+      </p>
+      <p style="font-size: 12px; color: #999; text-align: center">
+        Best regards, <span style="color: #407bff">Byte me!</span>
+      </p>
+    </div>`,
   };
 
   await sendEmail(userEmail);

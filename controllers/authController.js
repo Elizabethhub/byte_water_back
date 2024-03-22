@@ -1,11 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import fs from 'fs/promises';
-import path from 'path';
-import { nanoid } from 'nanoid';
 
 import gravatar from 'gravatar';
-import Jimp from 'jimp';
 
 import * as authServices from '../services/authServices.js';
 import * as userServices from '../services/userServices.js';
@@ -15,8 +12,7 @@ import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helpers/HttpError.js';
 import sendEmail from '../helpers/sendEmail.js';
 import { generateRandomCode } from '../helpers/generateRandomCode.js';
-
-const avatarsDir = path.resolve('public', 'avatars');
+import cloudinary from '../helpers/cloudinary.js';
 
 const { JWT_SECRET, BASE_URL, DEPLOY_HOST } = process.env;
 
@@ -26,9 +22,7 @@ const signup = async (req, res) => {
   if (user) {
     throw HttpError(409, 'email already used');
   }
-  // const verificationCode = nanoid();
   const avatarURL = gravatar.url(email);
-  // const newUser = await authServices.signup({ ...req.body, avatarURL, verificationCode });
   const newUser = await authServices.signup({
     ...req.body,
     avatarURL,
@@ -130,7 +124,7 @@ const updateUserInfo = async (req, res) => {
   const user = await userServices.findUser({ email });
   console.log(user);
   if (!user) {
-    throw HttpError(404, 'Such user does not exist'); //"Email invalid"
+    throw HttpError(404, 'Such user does not exist');
   }
 
   if (oldPassword) {
@@ -147,7 +141,7 @@ const updateUserInfo = async (req, res) => {
       throw HttpError(
         400,
         'The new password must be different from the old one'
-      ); //"Password invalid")
+      );
     }
   }
 
@@ -174,15 +168,13 @@ const updateDailyNorma = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const { email } = req.user;
+  const { url: avatarURL } = await cloudinary.uploader.upload(req.file.path, {
+    folder: 'avatars',
+  });
+  console.log(avatarURL);
+  const { path: oldPath } = req.file;
 
-  const { path: oldPath, filename } = req.file;
-  const newPath = path.join(avatarsDir, filename);
-
-  const file = await Jimp.read(oldPath);
-  file.resize(250, 250);
-
-  await fs.rename(oldPath, newPath);
-  const avatarURL = path.join('avatars', filename);
+  await fs.rm(oldPath);
 
   const result = await userServices.updateUser(
     { email },

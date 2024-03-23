@@ -1,9 +1,9 @@
-import multer from "multer";
-import path from "path";
+import multer from 'multer';
+import path from 'path';
 
-import HttpError from "../helpers/HttpError.js";
+import HttpError from '../helpers/HttpError.js';
 
-const destination = path.resolve("temp");
+const destination = path.resolve('temp');
 
 const storage = multer.diskStorage({
   destination,
@@ -19,9 +19,9 @@ const limits = {
 };
 
 const fileFilter = (req, file, cb) => {
-  const extension = file.originalname.split(".").pop();
-  if (extension === "exe") {
-    return cb(HttpError(400, ".exe extension is not allowed"));
+  const extension = file.originalname.split('.').pop();
+  if (extension === 'exe') {
+    return cb(HttpError(400, '.exe extension is not allowed'));
   }
   cb(null, true);
 };

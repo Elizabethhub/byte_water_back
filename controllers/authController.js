@@ -147,7 +147,7 @@ const updateUserInfo = async (req, res) => {
   }
 
   const result = await userServices.updateUser({ email }, req.body);
-  const { avatarURL, gender, email: newEmail, username } = result;
+  const { avatarURL, gender, email: newEmail, username, dailyNorma } = result;
 
   if (!result) {
     throw HttpError(404, 'Such user does not exist');
@@ -157,6 +157,7 @@ const updateUserInfo = async (req, res) => {
     username,
     email: newEmail,
     avatarURL,
+    dailyNorma,
   });
 };
 

@@ -15,7 +15,7 @@ import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helpers/HttpError.js';
 import sendEmail from '../helpers/sendEmail.js';
 import { generateRandomCode } from '../helpers/generateRandomCode.js';
-import { confirmLetterSvg } from '../constants/confirmLetter.js';
+import { imgWaterLogo } from '../constants/waterTrackerImg.png';
 
 const avatarsDir = path.resolve('public', 'avatars');
 
@@ -212,49 +212,26 @@ const forgotPassword = async (req, res) => {
     to: email,
     subject: 'Forgot password',
     html: `
- <div
-      style="
-        justify-content: center;
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        width: 500px;
-        margin: 0 auto;
-        border: 5px solid #9ebbff;
-        border-radius: 20px;
-      "
-    >
-      <p style="font-size: 16px; color: #333; text-align: center; margin-bottom: 20px">
-        Good day, ${email} .
-      </p>
-      ${confirmLetterSvg}
-
-      <p style="font-size: 14px; color: #666; text-align: center">
-        Thank you for registering on our website. <br />
-        To complete the authorization process, please click on the link below:
-      </p>
-      <div style="text-align: center; margin-bottom: 20px">
-        <a
-          target="_blank"
-          href="${DEPLOY_HOST}/update-password/${tempCode}"
-          style="
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #407bff;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-          "
-          >Click to update your password!</a
-        >
-      </div>
-      <p style="font-size: 14px; color: #666; text-align: justify">
-        If you have not taken this action, ignore this message.
-      </p>
-      <p style="font-size: 12px; color: #999; text-align: center">
-        Best regards, <span style="color: #407bff">Byte me!</span>
-      </p>
-    </div>`,
+    <table style="width: 500px; margin: 0 auto; border: 5px solid #9ebbff; border-radius: 20px;">
+    <tr>
+      <td style="text-align: center;">
+        <p style="font-size: 16px; color: #333; margin-bottom: 20px;">Good day, ${email} .</p>
+      </td>
+    </tr>
+    <tr>
+      <td> <img src="${imgWaterLogo}" alt="water-Tracker-Img" border="0" style="display: block; width: 102px; margin: 0 auto;"> </td>
+    </tr>
+    <tr>
+      <td style="text-align: center;">
+        <p style="font-size: 14px; color: #666;">Thank you for registering on our website. <br /> To complete the authorization process, please click on the link below:</p>
+        <div style="margin-bottom: 20px;">
+          <a href="${DEPLOY_HOST}/update-password/${tempCode}" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #407bff; color: #fff; text-decoration: none; border-radius: 5px;">Click to update your password!</a>
+        </div>
+        <p style="font-size: 14px; color: #666; text-align: center;">If you have not taken this action, ignore this message.</p>
+        <p style="font-size: 12px; color: #999; text-align: center;">Best regards, <span style="color: #407bff;">Byte me!</span></p>
+      </td>
+    </tr>
+  </table>`,
   };
 
   await sendEmail(userEmail);

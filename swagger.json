@@ -21,6 +21,10 @@
       "description": "Authorization endpoints"
     },
     {
+      "name": "User",
+      "description": "User info endpoints"
+    },
+    {
       "name": "Water",
       "description": "Water endpoints"
     }
@@ -177,7 +181,7 @@
     },
     "/users/current": {
       "get": {
-        "tags": ["Auth"],
+        "tags": ["User"],
         "summary": "Get current user information",
         "security": [{ "Bearer": [] }],
         "responses": {
@@ -199,7 +203,7 @@
     },
     "/users/update-user": {
       "patch": {
-        "tags": ["Auth"],
+        "tags": ["User"],
         "summary": "Update user information",
         "security": [{ "Bearer": [] }],
         "requestBody": {
@@ -235,7 +239,7 @@
     },
     "/users/avatars": {
       "patch": {
-        "tags": ["Auth"],
+        "tags": ["User"],
         "summary": "Update user avatar",
         "security": [{ "Bearer": [] }],
         "requestBody": {
@@ -282,7 +286,7 @@
     },
     "/users": {
       "patch": {
-        "tags": ["Auth"],
+        "tags": ["User"],
         "summary": "Update user daily norma",
         "security": [{ "Bearer": [] }],
         "requestBody": {

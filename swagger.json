@@ -1,16 +1,16 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "version": "2.0.2",
-    "title": "Swagger test",
+    "version": "1.0.0",
+    "title": "Swagger Water Tracker by Byte group",
     "description": "Showing off swagger-ui-express",
     "license": {
       "name": "MIT",
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json", "multipart/form-data"],
   "servers": [
     { "url": "http://localhost:4000" },
     { "url": "byte-water-back.onrender.com/api" }
@@ -19,10 +19,14 @@
     {
       "name": "Auth",
       "description": "Authorization endpoints"
+    },
+    {
+      "name": "Water",
+      "description": "Water endpoints"
     }
   ],
   "paths": {
-    "/auth/register": {
+    "/users/register": {
       "post": {
         "tags": ["Auth"],
         "summary": "User registration",

@@ -31,7 +31,7 @@ waterRouter.delete('/:id', isValidId, waterController.deleteWater);
 waterRouter.get(
   '/month',
   validateBody(validateDate),
-  waterController.monthInfoWaterNote
+  waterController.monthInfoWater
 );
 
 // waterNotesRouter.get(

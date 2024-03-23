@@ -44,15 +44,18 @@ const deleteWater = async (req, res) => {
   res.json(result);
 };
 
-export async function monthInfoWaterNote(req, res) {
+export async function monthInfoWater(req, res) {
   const { _id: owner } = req.user;
   const { year, month } = req.query;
   console.log('month: ', month);
   console.log('year: ', year);
 
-  const waterConsumptionMonth =
-    await waterServices.getWaterConsumptionMonthSummary(owner, year, month);
-  res.status(200).json(waterConsumptionMonth);
+  const monthlyWaterConsumption = await waterServices.getMonthlyWaterStatistics(
+    owner,
+    year,
+    month
+  );
+  res.status(200).json(monthlyWaterConsumption);
 }
 
 export default {
@@ -60,5 +63,5 @@ export default {
   editWater: ctrlWrapper(editWater),
   getAllWater: ctrlWrapper(getAllWater),
   deleteWater: ctrlWrapper(deleteWater),
-  monthInfoWaterNote: ctrlWrapper(monthInfoWaterNote),
+  monthInfoWater: ctrlWrapper(monthInfoWater),
 };

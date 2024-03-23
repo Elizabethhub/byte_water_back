@@ -1,6 +1,7 @@
 import HttpError from '../helpers/HttpError.js';
 import Water from '../models/Water.js';
 import { findUserById } from './userServices.js';
+import dateFormat from '../helpers/formatDate.js';
 
 export const addWater = (data) => Water.create(data);
 
@@ -11,33 +12,33 @@ export const editWater = (id, body) =>
 
 export const deleteWater = (id) => Water.findByIdAndDelete(id);
 
-export async function getWaterConsumptionMonthSummary(owner, year, month) {
+export async function getMonthlyWaterStatistics(owner, year, month) {
   const user = await findUserById(owner);
   if (!user) throw HttpError(404, 'User not found');
 
-  const dailyNormAmount = user.dailyNorma;
-  const firstDayOfMonth = new Date(year, month - 1, 1);
-  const lastDayOfMonth = new Date(year, month, 0, 23, 59, 59, 999);
+  const dailyNormQuantity = user.dailyNorma;
+  const firstDayOfCurrentMonth = new Date(year, month - 1, 1);
+  const lastDayOfCurrentMonth = new Date(year, month, 0, 23, 59, 59, 999);
 
-  const waterConsumptionArray = await Water.aggregate([
+  const waterStatisticsList = await Water.aggregate([
     {
       $match: {
-        owner: owner,
-        date: { $gte: firstDayOfMonth, $lt: lastDayOfMonth },
+        userId: owner,
+        time: { $gte: firstDayOfCurrentMonth, $lt: lastDayOfCurrentMonth },
       },
     },
     {
       $group: {
-        _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
-        waterVolumeSum: { $sum: '$waterAmount' },
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$time' } },
+        waterSum: { $sum: '$milliliters' },
         waterVolumes: { $push: '$$ROOT' },
       },
     },
     {
       $addFields: {
-        waterVolumePercentage: {
+        waterVolPercentage: {
           $round: {
-            $multiply: [{ $divide: ['$waterVolumeSum', dailyNormAmount] }, 100],
+            $multiply: [{ $divide: ['$waterSum', dailyNormQuantity] }, 100],
           },
         },
       },
@@ -49,24 +50,22 @@ export async function getWaterConsumptionMonthSummary(owner, year, month) {
       $project: {
         _id: 0,
         date: '$_id',
-        waterVolumeSum: 1,
-        waterVolumePercentage: 1,
+        waterSum: 1,
+        waterVolPercentage: 1,
         waterVolumes: 1,
       },
     },
   ]);
 
-  const waterObjectresult = waterConsumptionArray.reduce((acc, item) => {
-    const portions = item.waterVolumes.length;
+  const waterObjectresult = waterStatisticsList.reduce((acc, item) => {
+    const waterPortions = item.waterVolumes.length;
     acc[item.date] = {
       date: dateFormat.formatDate(item.date),
-      portions: portions,
-      waterVolumePercentage: item.waterVolumePercentage,
-      dailyNorma: dailyNormAmount,
+      waterPortions: waterPortions,
+      waterVolPercentage: item.waterVolumePercentage,
+      dailyNorma: dailyNormQuantity,
     };
-
     return acc;
   }, {});
-  console.log('acc', acc);
   return waterObjectresult;
 }

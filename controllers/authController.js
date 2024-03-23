@@ -12,7 +12,7 @@ import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helpers/HttpError.js';
 import sendEmail from '../helpers/sendEmail.js';
 import { generateRandomCode } from '../helpers/generateRandomCode.js';
-import { imgWaterLogo } from '../constants/waterTrackerImg.png';
+// import { imgWaterLogo } from '../constants/waterTrackerImg.png';
 import cloudinary from '../helpers/cloudinary.js';
 // import { confirmLetterSvg } from '../constants/confirmLetter.js';
 
@@ -213,8 +213,9 @@ const forgotPassword = async (req, res) => {
       </td>
     </tr>
     <tr>
-      <td> <img src="${imgWaterLogo}" alt="water-Tracker-Img" border="0" style="display: block; width: 102px; margin: 0 auto;"> </td>
-    </tr>
+      <td>
+       <img src="https://i.ibb.co/TkY6Zf6/water-Tracker-Img.png" alt="water-Tracker-Img" border="0" style="display: block; width: 102px; margin: 0 auto;"> </td>
+      </tr>
     <tr>
       <td style="text-align: center;">
         <p style="font-size: 14px; color: #666;">Thank you for registering on our website. <br /> To complete the authorization process, please click on the link below:</p>

@@ -26,7 +26,7 @@
     },
     {
       "name": "Water",
-      "description": "Water endpoints"
+      "description": "Water consumption endpoints"
     }
   ],
   "paths": {
@@ -295,7 +295,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#components/schemas/UpdateDailyNormaRequest"
+                "$ref": "#components/schemas/UpdateDailyNorma"
               }
             }
           }
@@ -306,7 +306,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateDailyNormaRequest"
+                  "$ref": "#/components/schemas/UpdateDailyNorma"
                 }
               }
             }
@@ -316,6 +316,223 @@
           },
           "401": {
             "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water/addwater": {
+      "post": {
+        "tags": ["Water"],
+        "summary": "Add water consumption",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaterAddReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Water consumption added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water": {
+      "get": {
+        "tags": ["Water"],
+        "summary": "Get all water consumption",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllWaterRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water/{id}": {
+      "put": {
+        "tags": ["Water"],
+        "summary": "Edit water consumption",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the water consumption entry to edit",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaterAddReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Water consumption edited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Water consumption not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Water"],
+        "summary": "Delete water consumption",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the water consumption entry to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Water consumption deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Water consumption not found"
+          }
+        }
+      }
+    },
+    "/water/month": {
+      "get": {
+        "tags": ["Water"],
+        "summary": "Get monthly water consumption statistics",
+        "security": [{ "Bearer": [] }],
+
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Year for which to retrieve statistics",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 2000,
+              "maximum": 2100
+            },
+            "style": "form"
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "description": "Month for which to retrieve statistics",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "Date of water consumption"
+                    },
+                    "waterPortions": {
+                      "type": "integer",
+                      "description": "Number of water portions consumed on the date"
+                    },
+                    "waterVolPercentage": {
+                      "type": "number",
+                      "description": "Percentage of daily water consumption"
+                    },
+                    "dailyNorma": {
+                      "type": "number",
+                      "description": "Daily norm of water consumption"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -498,12 +715,113 @@
           }
         }
       },
-      "UpdateDailyNormaRequest": {
+      "UpdateDailyNorma": {
         "type": "object",
         "properties": {
-          "dailyNorma": {
+          "milliliters": {
             "type": "number",
             "description": "User's updated daily norma"
+          }
+        }
+      },
+      "WaterAddReq": {
+        "type": "object",
+        "properties": {
+          "milliliters": {
+            "type": "number",
+            "description": "Amount of water consumed in milliliters"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of water consumption"
+          }
+        },
+        "required": ["milliliters", "time"]
+      },
+      "WaterAddRes": {
+        "type": "object",
+        "properties": {
+          "milliliters": {
+            "type": "number",
+            "description": "Amount of water consumed in milliliters"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of water consumption"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User's Id"
+          },
+          "_id": {
+            "type": "string",
+            "description": "Water item id"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of created water consumption item"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of updated water consumption item"
+          }
+        }
+      },
+      "AllWaterRes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "description": "Unique identifier for the water entry"
+            },
+            "milliliters": {
+              "type": "number",
+              "description": "Amount of water consumed in milliliters"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water was consumed"
+            },
+            "userId": {
+              "type": "string",
+              "description": "Unique identifier of the user who consumed the water"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water entry was created"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water entry was last updated"
+            }
+          }
+        }
+      },
+      "WaterMonthReq": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 2000,
+            "maximum": 2100,
+            "description": "Year for which to retrieve statistics"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month for which to retrieve statistics"
           }
         }
       }

@@ -19,10 +19,6 @@ export const updateUserSchema = Joi.object({
   newPassword: Joi.string().min(8),
 });
 
-export const verifySchema = Joi.object({
-  email: Joi.string().pattern(emailRegexp).required(),
-});
-
 export const updateDayNorma = Joi.object({
   dailyNorma: Joi.number().min(1).max(15000).required(),
 });

@@ -15,7 +15,7 @@ import { generateRandomCode } from '../helpers/generateRandomCode.js';
 import cloudinary from '../helpers/cloudinary.js';
 import { confirmLetterSvg } from '../constants/confirmLetter.js';
 
-const { JWT_SECRET, BASE_URL, DEPLOY_HOST } = process.env;
+const { JWT_SECRET, DEPLOY_HOST } = process.env;
 
 const signup = async (req, res) => {
   const { email } = req.body;
@@ -36,43 +36,6 @@ const signup = async (req, res) => {
     email: newUser.email,
     avatarURL: avatarURL,
     dailyNorma: newUser.dailyNorma,
-  });
-};
-
-const verify = async (req, res) => {
-  const { verificationCode } = req.params;
-  const user = await userServices.findUser({ verificationCode });
-  if (!user) {
-    throw HttpError(404, 'User not found');
-  }
-  await userServices.updateUser(
-    { _id: user.id },
-    { verify: true, verificationCode: '' }
-  );
-  res.json({
-    message: 'Verification successful',
-  });
-};
-
-const resendVerifyEmail = async (req, res) => {
-  const { email } = req.body;
-  const user = await userServices.findUser({ email });
-  if (!user) {
-    throw HttpError(404, 'User not found');
-  }
-  if (user.verify) {
-    throw HttpError(400, 'User already verified');
-  }
-  const verifyEmail = {
-    to: email,
-    subject: 'Verify email',
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationCode}">Click to verify email</a>`,
-  };
-
-  await sendEmail(verifyEmail);
-
-  res.json({
-    message: 'Verification email sent',
   });
 };
 
@@ -207,10 +170,6 @@ const forgotPassword = async (req, res) => {
     html: `
  <div
       style="
-        justify-content: center;
-        display: flex;
-        align-items: center;
-        flex-direction: column;
         width: 500px;
         margin: 0 auto;
         border: 5px solid #9ebbff;
@@ -241,7 +200,7 @@ const forgotPassword = async (req, res) => {
           >Click to update your password!</a
         >
       </div>
-      <p style="font-size: 14px; color: #666; text-align: justify">
+      <p style="font-size: 14px; color: #666; text-align: center">
         If you have not taken this action, ignore this message.
       </p>
       <p style="font-size: 12px; color: #999; text-align: center">
@@ -282,8 +241,6 @@ const updatePassword = async (req, res) => {
 
 export default {
   signup: ctrlWrapper(signup),
-  verify: ctrlWrapper(verify),
-  resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
   signin: ctrlWrapper(signin),
   signout: ctrlWrapper(signout),
   getCurrent: ctrlWrapper(getCurrent),

@@ -8,7 +8,6 @@ export const findUserById = (id) => User.findById(id);
 export const updateUser = async (filter, data) => {
   if (data.newPassword) {
     const { newPassword: password } = data;
-    console.log(password);
     const hashPassword = await bcrypt.hash(password, 10); // const salt = await bcrypt.genSalt(10);
     return User.findOneAndUpdate(
       filter,

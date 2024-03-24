@@ -85,25 +85,20 @@ const getCurrent = async (req, res) => {
 const updateUserInfo = async (req, res) => {
   const { email, password } = req.user;
   const { oldPassword, newPassword } = req.body;
-  console.log(newPassword);
-  console.log(oldPassword);
 
   const user = await userServices.findUser({ email });
-  console.log(user);
+
   if (!user) {
     throw HttpError(404, 'Such user does not exist');
   }
-
   if (oldPassword) {
     const oldPasswordCompare = await bcrypt.compare(oldPassword, password);
-    console.log(oldPasswordCompare);
     if (!oldPasswordCompare) {
       throw HttpError(400, 'The old password is wrong');
     }
   }
   if (newPassword) {
     const passwordCompare = await bcrypt.compare(newPassword, password);
-    console.log(passwordCompare);
     if (passwordCompare) {
       throw HttpError(
         400,
@@ -139,7 +134,6 @@ const updateAvatar = async (req, res) => {
   const { url: avatarURL } = await cloudinary.uploader.upload(req.file.path, {
     folder: 'avatars',
   });
-  console.log(avatarURL);
   const { path: oldPath } = req.file;
 
   await fs.rm(oldPath);

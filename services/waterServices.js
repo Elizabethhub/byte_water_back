@@ -68,7 +68,7 @@ export async function getMonthlyWaterStatistics(owner, year, month) {
       month,
       ...waterStatisticsList.reduce((acc, item) => {
         if (dateFormat.formatDateDay(item.date) == index) {
-          acc[item.date] = {
+          acc = {
             date: dateFormat.formatDate(item.date),
             waterPortions: item.waterVolumes.length,
             waterVolPercentage: item.waterVolPercentage,

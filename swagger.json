@@ -510,29 +510,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "date": {
-                      "type": "string",
-                      "format": "date",
-                      "description": "Date of water consumption"
-                    },
-                    "waterPortions": {
-                      "type": "integer",
-                      "description": "Number of water portions consumed on the date"
-                    },
-                    "waterVolPercentage": {
-                      "type": "number",
-                      "description": "Percentage of daily water consumption"
-                    },
-                    "dailyNorma": {
-                      "type": "number",
-                      "description": "Daily norm of water consumption"
-                    }
-                  }
+                  "$ref": "#/components/schemas/WaterMonthResponse"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/water/today": {
+      "get": {
+        "tags": ["Water"],
+        "summary": "Get water consumption summary for today",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Date for which to retrieve water consumption summary (format: YYYY-MM-DD)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterConsumptionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }
@@ -822,6 +843,70 @@
             "minimum": 1,
             "maximum": 12,
             "description": "Month for which to retrieve statistics"
+          }
+        }
+      },
+      "WaterMonthResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of water consumption"
+          },
+          "waterPortions": {
+            "type": "integer",
+            "description": "Number of water portions consumed on the date"
+          },
+          "waterVolPercentage": {
+            "type": "number",
+            "description": "Percentage of daily water consumption"
+          },
+          "dailyNorma": {
+            "type": "number",
+            "description": "Daily norm of water consumption"
+          }
+        }
+      },
+      "WaterConsumptionSummary": {
+        "type": "object",
+        "properties": {
+          "waterVolumeSum": {
+            "type": "number",
+            "description": "Total volume of water consumed today"
+          },
+          "waterVolumes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WaterEntry"
+            },
+            "description": "Array of water consumption entries for today"
+          },
+          "waterVolumePercentage": {
+            "type": "number",
+            "description": "Percentage of daily water consumption"
+          }
+        }
+      },
+      "WaterEntry": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique identifier for the water entry"
+          },
+          "milliliters": {
+            "type": "number",
+            "description": "Amount of water consumed in milliliters"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of when the water was consumed"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Unique identifier of the user who consumed the water"
           }
         }
       }

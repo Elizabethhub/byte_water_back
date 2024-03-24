@@ -1,14 +1,14 @@
-import ctrlWrapper from "../decorators/ctrlWrapper.js";
-import HttpError from "../helpers/HttpError.js";
+import ctrlWrapper from '../decorators/ctrlWrapper.js';
+import HttpError from '../helpers/HttpError.js';
 
-import * as waterServices from "../services/waterServices.js";
+import * as waterServices from '../services/waterServices.js';
 
 const addWater = async (req, res) => {
   const { _id: userId } = req.user;
   const { milliliters } = req.body;
 
   if (milliliters >= 5000) {
-    throw HttpError(400, "Milliliters must be less than 5000");
+    throw HttpError(400, 'Milliliters must be less than 5000');
   }
 
   const result = await waterServices.addWater({ ...req.body, userId });
@@ -44,9 +44,24 @@ const deleteWater = async (req, res) => {
   res.json(result);
 };
 
+export async function monthInfoWater(req, res) {
+  const { _id: owner } = req.user;
+  const { year, month } = req.query;
+  console.log('month: ', month);
+  console.log('year: ', year);
+
+  const monthlyWaterConsumption = await waterServices.getMonthlyWaterStatistics(
+    owner,
+    year,
+    month
+  );
+  res.status(200).json(monthlyWaterConsumption);
+}
+
 export default {
   addWater: ctrlWrapper(addWater),
   editWater: ctrlWrapper(editWater),
   getAllWater: ctrlWrapper(getAllWater),
   deleteWater: ctrlWrapper(deleteWater),
+  monthInfoWater: ctrlWrapper(monthInfoWater),
 };

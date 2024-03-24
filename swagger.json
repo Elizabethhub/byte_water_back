@@ -1,0 +1,837 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger Water Tracker by Byte group",
+    "description": "Showing off swagger-ui-express",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json", "multipart/form-data"],
+  "servers": [
+    { "url": "http://localhost:4000/api" },
+    { "url": "byte-water-back.onrender.com/api" }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authorization endpoints"
+    },
+    {
+      "name": "User",
+      "description": "User info endpoints"
+    },
+    {
+      "name": "Water",
+      "description": "Water consumption endpoints"
+    }
+  ],
+  "paths": {
+    "/users/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User registration",
+        "requestBody": {
+          "description": "Registration request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)",
+            "content": {}
+          },
+          "409": {
+            "description": "Provided email already exists",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User sign-in",
+        "requestBody": {
+          "description": "Sign-in request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SigninRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful sign-in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SigninResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (email or password invalid)"
+          }
+        }
+      }
+    },
+    "/users/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User sign-out",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful sign-out"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/forgot-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Forgot password",
+        "requestBody": {
+          "description": "Forgot password request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Forgot password email sent"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/users/update-password/{tempCode}": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Update password",
+        "parameters": [
+          {
+            "name": "tempCode",
+            "in": "path",
+            "description": "Temporary code for password update",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "description": "Update password request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully"
+          },
+          "401": {
+            "description": "Unauthorized (old password is the same as the new one)"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/users/current": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get current user information",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/update-user": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Update user information",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "description": "Update user information request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User information updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/avatars": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Update user avatar",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "description": "Update user avatar request object",
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatarURL": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Avatar updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "avatarURL": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Update user daily norma",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "description": "Update user daily norma request object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#components/schemas/UpdateDailyNorma"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDailyNorma"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water/addwater": {
+      "post": {
+        "tags": ["Water"],
+        "summary": "Add water consumption",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaterAddReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Water consumption added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water": {
+      "get": {
+        "tags": ["Water"],
+        "summary": "Get all water consumption",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllWaterRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/water/{id}": {
+      "put": {
+        "tags": ["Water"],
+        "summary": "Edit water consumption",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the water consumption entry to edit",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaterAddReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Water consumption edited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Water consumption not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Water"],
+        "summary": "Delete water consumption",
+        "security": [{ "Bearer": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the water consumption entry to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "ObjectId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Water consumption deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WaterAddRes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Water consumption not found"
+          }
+        }
+      }
+    },
+    "/water/month": {
+      "get": {
+        "tags": ["Water"],
+        "summary": "Get monthly water consumption statistics",
+        "security": [{ "Bearer": [] }],
+
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Year for which to retrieve statistics",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 2000,
+              "maximum": 2100
+            },
+            "style": "form"
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "description": "Month for which to retrieve statistics",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "date": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "Date of water consumption"
+                    },
+                    "waterPortions": {
+                      "type": "integer",
+                      "description": "Number of water portions consumed on the date"
+                    },
+                    "waterVolPercentage": {
+                      "type": "number",
+                      "description": "Percentage of daily water consumption"
+                    },
+                    "dailyNorma": {
+                      "type": "number",
+                      "description": "Daily norm of water consumption"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegistrationRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "qwerty123"
+          }
+        }
+      },
+      "RegistrationResponse": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "User's username"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "avatarURL": {
+            "type": "string",
+            "description": "URL of user's avatar"
+          },
+          "dailyNorma": {
+            "type": "number",
+            "description": "User's daily norma"
+          }
+        }
+      },
+      "SigninRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password"
+          }
+        }
+      },
+      "SigninResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "JWT token for authentication"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "description": "User's email",
+                "format": "email"
+              },
+              "username": {
+                "type": "string",
+                "description": "User's username"
+              },
+              "avatarURL": {
+                "type": "string",
+                "description": "URL of user's avatar"
+              },
+              "dailyNorma": {
+                "type": "number",
+                "description": "User's daily norma"
+              }
+            }
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          }
+        }
+      },
+      "UpdatePasswordRequest": {
+        "type": "object",
+        "required": ["newPassword"],
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "description": "New password for the user"
+          }
+        }
+      },
+      "CurrentUserResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "avatarURL": {
+            "type": "string",
+            "description": "URL of user's avatar"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's username"
+          },
+          "gender": {
+            "type": "string",
+            "description": "User's gender"
+          },
+          "dailyNorma": {
+            "type": "number",
+            "description": "User's daily norma"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's username"
+          },
+          "gender": {
+            "type": "string",
+            "description": "User's gender"
+          }
+        }
+      },
+      "UpdateUserResponse": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email"
+          },
+          "avatarURL": {
+            "type": "string",
+            "description": "URL of user's avatar"
+          },
+          "username": {
+            "type": "string",
+            "description": "User's username"
+          },
+          "gender": {
+            "type": "string",
+            "description": "User's gender"
+          },
+          "dailyNorma": {
+            "type": "number",
+            "description": "User's daily norma"
+          }
+        }
+      },
+      "UpdateDailyNorma": {
+        "type": "object",
+        "properties": {
+          "milliliters": {
+            "type": "number",
+            "description": "User's updated daily norma"
+          }
+        }
+      },
+      "WaterAddReq": {
+        "type": "object",
+        "properties": {
+          "milliliters": {
+            "type": "number",
+            "description": "Amount of water consumed in milliliters"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of water consumption"
+          }
+        },
+        "required": ["milliliters", "time"]
+      },
+      "WaterAddRes": {
+        "type": "object",
+        "properties": {
+          "milliliters": {
+            "type": "number",
+            "description": "Amount of water consumed in milliliters"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of water consumption"
+          },
+          "userId": {
+            "type": "string",
+            "description": "User's Id"
+          },
+          "_id": {
+            "type": "string",
+            "description": "Water item id"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of created water consumption item"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of updated water consumption item"
+          }
+        }
+      },
+      "AllWaterRes": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "description": "Unique identifier for the water entry"
+            },
+            "milliliters": {
+              "type": "number",
+              "description": "Amount of water consumed in milliliters"
+            },
+            "time": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water was consumed"
+            },
+            "userId": {
+              "type": "string",
+              "description": "Unique identifier of the user who consumed the water"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water entry was created"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp of when the water entry was last updated"
+            }
+          }
+        }
+      },
+      "WaterMonthReq": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 2000,
+            "maximum": 2100,
+            "description": "Year for which to retrieve statistics"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month for which to retrieve statistics"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

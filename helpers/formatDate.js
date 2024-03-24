@@ -1,9 +1,11 @@
-import { format } from "date-fns";
+import { format } from 'date-fns';
 
-const formatDate = (date) => format(new Date(date), "d, LLLL");
+const formatDate = (date) => format(new Date(date), 'd, LLLL');
+const formatDateDay = (date) => format(new Date(date), 'd');
+const formatDateMonth = (date) => format(new Date(date), 'LLLL');
 
 const formatDateForEndpoins = (date) => {
-  const timeComponents = date.split(":");
+  const timeComponents = date.split(':');
   const hours = Number(timeComponents[0]);
   const minutes = Number(timeComponents[1]);
 
@@ -17,4 +19,6 @@ const formatDateForEndpoins = (date) => {
 export default {
   formatDate,
   formatDateForEndpoins,
+  formatDateDay,
+  formatDateMonth,
 };

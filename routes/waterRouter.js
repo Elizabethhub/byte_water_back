@@ -28,16 +28,8 @@ waterRouter.put(
 );
 waterRouter.delete('/:id', isValidId, waterController.deleteWater);
 
-waterRouter.get(
-  '/month',
-  validateBody(validateDate),
-  waterController.monthInfoWater
-);
+waterRouter.get('/month', waterController.monthInfoWater);
 
-// waterNotesRouter.get(
-//   "/today",
-//   validateQuery(waterSchemas.todayDatevalidation),
-//   getTodayWaterNote
-// );
+waterRouter.get('/today', waterController.getTodayWaterNote);
 
 export default waterRouter;

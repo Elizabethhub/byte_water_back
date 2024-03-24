@@ -58,10 +58,20 @@ export async function monthInfoWater(req, res) {
   res.status(200).json(monthlyWaterConsumption);
 }
 
+export async function getTodayWaterNote(req, res) {
+  const { _id: owner } = req.user;
+  const { date } = req.query;
+  console.log('date', date);
+  const waterConsumptionArray =
+    await waterServices.getWaterConsumptionDaySummary(owner, date);
+  res.status(200).json(waterConsumptionArray[0]);
+}
+
 export default {
   addWater: ctrlWrapper(addWater),
   editWater: ctrlWrapper(editWater),
   getAllWater: ctrlWrapper(getAllWater),
   deleteWater: ctrlWrapper(deleteWater),
   monthInfoWater: ctrlWrapper(monthInfoWater),
+  getTodayWaterNote: ctrlWrapper(getTodayWaterNote),
 };

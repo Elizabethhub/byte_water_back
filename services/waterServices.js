@@ -57,15 +57,85 @@ export async function getMonthlyWaterStatistics(owner, year, month) {
     },
   ]);
 
-  const waterObjectresult = waterStatisticsList.reduce((acc, item) => {
-    const waterPortions = item.waterVolumes.length;
-    acc[item.date] = {
-      date: dateFormat.formatDate(item.date),
-      waterPortions: waterPortions,
-      waterVolPercentage: item.waterVolumePercentage,
-      dailyNorma: dailyNormQuantity,
-    };
-    return acc;
-  }, {});
-  return waterObjectresult;
+  const numDays = (y, m) => new Date(y, m, 0).getDate();
+  const daysInMonth = numDays(year, month);
+  console.log('daysInMonth: ', daysInMonth);
+
+  let list = [];
+  for (let index = 1; index <= daysInMonth; index++) {
+    list.push({
+      day: index,
+      month,
+      ...waterStatisticsList.reduce((acc, item) => {
+        if (dateFormat.formatDateDay(item.date) == index) {
+          acc[item.date] = {
+            date: dateFormat.formatDate(item.date),
+            waterPortions: item.waterVolumes.length,
+            waterVolPercentage: item.waterVolPercentage,
+            dailyNorma: dailyNormQuantity,
+          };
+        }
+
+        return acc;
+      }, {}),
+    });
+  }
+
+  console.log(list);
+
+  return list;
+}
+
+export async function getWaterConsumptionDaySummary(owner, time) {
+  const user = await findUserById(owner);
+  if (!user) throw HttpError(404, 'User not found');
+  const dailyNormAmount = user.dailyNorma;
+
+  let waterConsumptionArray = await Water.aggregate([
+    {
+      $match: {
+        $and: [
+          { userId: owner },
+          {
+            time: {
+              $gte: new Date(time),
+              $lt: new Date(new Date(time).getTime() + 24 * 60 * 60 * 1000),
+            },
+          },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        waterVolumeSum: { $sum: '$milliliters' },
+        waterVolumes: { $push: '$$ROOT' },
+      },
+    },
+    {
+      $addFields: {
+        waterVolumePercentage: {
+          $round: {
+            $multiply: [{ $divide: ['$waterVolumeSum', dailyNormAmount] }, 100],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+      },
+    },
+  ]);
+  if (waterConsumptionArray.length === 0) {
+    waterConsumptionArray = [
+      {
+        waterVolumeSum: 0,
+        waterVolumes: [],
+        waterVolumePercentage: 0,
+      },
+    ];
+  }
+
+  return waterConsumptionArray;
 }

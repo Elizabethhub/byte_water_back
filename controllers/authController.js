@@ -16,7 +16,7 @@ import { generateRandomCode } from '../helpers/generateRandomCode.js';
 import cloudinary from '../helpers/cloudinary.js';
 // import { confirmLetterSvg } from '../constants/confirmLetter.js';
 
-const { JWT_SECRET, BASE_URL, DEPLOY_HOST } = process.env;
+const { JWT_SECRET, DEPLOY_HOST } = process.env;
 
 const signup = async (req, res) => {
   const { email } = req.body;
@@ -30,6 +30,7 @@ const signup = async (req, res) => {
     avatarURL,
     username: `User${Date.now()}`,
     dailyNorma: 2000,
+    gender: 'woman',
   });
 
   res.status(201).json({
@@ -37,43 +38,7 @@ const signup = async (req, res) => {
     email: newUser.email,
     avatarURL: avatarURL,
     dailyNorma: newUser.dailyNorma,
-  });
-};
-
-const verify = async (req, res) => {
-  const { verificationCode } = req.params;
-  const user = await userServices.findUser({ verificationCode });
-  if (!user) {
-    throw HttpError(404, 'User not found');
-  }
-  await userServices.updateUser(
-    { _id: user.id },
-    { verify: true, verificationCode: '' }
-  );
-  res.json({
-    message: 'Verification successful',
-  });
-};
-
-const resendVerifyEmail = async (req, res) => {
-  const { email } = req.body;
-  const user = await userServices.findUser({ email });
-  if (!user) {
-    throw HttpError(404, 'User not found');
-  }
-  if (user.verify) {
-    throw HttpError(400, 'User already verified');
-  }
-  const verifyEmail = {
-    to: email,
-    subject: 'Verify email',
-    html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${user.verificationCode}">Click to verify email</a>`,
-  };
-
-  await sendEmail(verifyEmail);
-
-  res.json({
-    message: 'Verification email sent',
+    gender: newUser.gender,
   });
 };
 
@@ -90,10 +55,10 @@ const signin = async (req, res) => {
   const payload = { id: user._id };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '23h' });
   await authServices.setToken(user._id, token);
-  const { username, avatarURL, dailyNorma } = user;
+  const { username, avatarURL, dailyNorma, gender } = user;
   res.json({
     token,
-    user: { email, username, avatarURL, dailyNorma },
+    user: { email, username, avatarURL, dailyNorma, gender },
   });
 };
 
@@ -120,25 +85,20 @@ const getCurrent = async (req, res) => {
 const updateUserInfo = async (req, res) => {
   const { email, password } = req.user;
   const { oldPassword, newPassword } = req.body;
-  console.log(newPassword);
-  console.log(oldPassword);
 
   const user = await userServices.findUser({ email });
-  console.log(user);
+
   if (!user) {
     throw HttpError(404, 'Such user does not exist');
   }
-
   if (oldPassword) {
     const oldPasswordCompare = await bcrypt.compare(oldPassword, password);
-    console.log(oldPasswordCompare);
     if (!oldPasswordCompare) {
       throw HttpError(400, 'The old password is wrong');
     }
   }
   if (newPassword) {
     const passwordCompare = await bcrypt.compare(newPassword, password);
-    console.log(passwordCompare);
     if (passwordCompare) {
       throw HttpError(
         400,
@@ -174,7 +134,6 @@ const updateAvatar = async (req, res) => {
   const { url: avatarURL } = await cloudinary.uploader.upload(req.file.path, {
     folder: 'avatars',
   });
-  console.log(avatarURL);
   const { path: oldPath } = req.file;
 
   await fs.rm(oldPath);
@@ -261,8 +220,6 @@ const updatePassword = async (req, res) => {
 
 export default {
   signup: ctrlWrapper(signup),
-  verify: ctrlWrapper(verify),
-  resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
   signin: ctrlWrapper(signin),
   signout: ctrlWrapper(signout),
   getCurrent: ctrlWrapper(getCurrent),
